@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foxcore 零售活动与销售跟踪信息系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2316352C'/%3E%3Cpath d='M9 22V10h3l4 7 4-7h3v12h-3v-7l-4 7-4-7v7z' fill='%23D99A3D'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<script src="https://fastly.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+/* ============================================================
+   Foxcore 零售活动与销售跟踪信息系统 —— 样式表
+   设计语言：深墨绿 + 琥珀金，节日季零售管理后台
+   ============================================================ */
+:root{
+  --green-900:#122A24;
+  --green-800:#16352C;
+  --green-700:#1D4638;
+  --green-600:#1F5C46;
+  --green-100:#E3EDE8;
+  --gold-500:#D99A3D;
+  --gold-100:#F6EAD3;
+  --terra:#B8452C;
+  --terra-soft:#F5E2DC;
+  --ink:#1C2420;
+  --ink-2:#46504A;
+  --ink-3:#78817B;
+  --line:#DEE2DC;
+  --line-2:#EA EDE8;
+  --bg:#F2F4F0;
+  --card:#FFFFFF;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+  --sans:'IBM Plex Sans','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --shadow:0 1px 2px rgba(18,42,36,.06), 0 4px 14px rgba(18,42,36,.05);
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);
+  color:var(--ink);
+  background:var(--bg);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#C7CDC6;border-radius:6px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- 整体布局 ---------- */
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+
+/* ---------- 侧边栏 ---------- */
+.sidebar{
+  background:var(--green-900);
+  color:#C9D4CD;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+}
+.brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{display:flex;align-items:center;gap:10px}
+.brand-mark svg{flex:none}
+.brand-name{font-size:16px;font-weight:700;color:#fff;letter-spacing:.3px}
+.brand-sub{font-size:11px;color:var(--gold-500);margin-top:3px;letter-spacing:1.2px;text-transform:uppercase}
+.nav{padding:14px 12px;flex:1;overflow-y:auto}
+.nav-group{font-size:11px;color:#6E8078;letter-spacing:1.4px;padding:14px 10px 7px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:9px 10px;border-radius:8px;margin-bottom:2px;
+  font-size:13.5px;font-weight:500;color:#B9C6BF;
+  text-align:left;transition:background .15s,color .15s;
+}
+.nav-item svg{flex:none;opacity:.85}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:var(--green-600);color:#fff}
+.nav-item.active svg{opacity:1}
+.nav-item.hidden-item{display:none}
+.sidebar-foot{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#7E8F87;line-height:1.7}
+
+/* ---------- 主区域 ---------- */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{
+  background:rgba(242,244,240,.92);backdrop-filter:blur(8px);
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:16px;
+  padding:13px 28px;border-bottom:1px solid var(--line);
+}
+.page-title{font-size:17px;font-weight:700}
+.page-crumb{font-size:12px;color:var(--ink-3);margin-top:1px}
+.topbar-spacer{flex:1}
+.role-switch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 8px 5px 12px}
+.role-switch label{font-size:12px;color:var(--ink-3)}
+.role-switch select{
+  border:none;outline:none;background:transparent;font-weight:600;font-size:13px;
+  padding:3px 4px;cursor:pointer;
+}
+.role-dot{width:8px;height:8px;border-radius:50%;background:var(--gold-500)}
+.content{padding:26px 28px 40px;max-width:1440px;width:100%}
+
+/* ---------- 通用组件 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.card-head h3{font-size:14.5px;font-weight:700}
+.card-head .sub{font-size:12px;color:var(--ink-3)}
+.card-body{padding:20px}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 15px;border-radius:8px;font-size:13px;font-weight:600;
+  border:1px solid transparent;transition:filter .15s,background .15s,border-color .15s;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--green-600);color:#fff}
+.btn-primary:hover{background:var(--green-700)}
+.btn-gold{background:var(--gold-500);color:#2A1F08}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--ink-2)}
+.btn-ghost:hover{background:#F6F8F4}
+.btn-danger{background:#fff;border-color:var(--terra);color:var(--terra)}
+.btn-danger:hover{background:var(--terra-soft)}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.icon-btn{padding:6px;border-radius:7px;color:var(--ink-3);display:inline-flex}
+.icon-btn:hover{background:#EEF1EC;color:var(--terra)}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600;line-height:1.6}
+.tag-green{background:var(--green-100);color:var(--green-600)}
+.tag-gold{background:var(--gold-100);color:#9A6A1F}
+.tag-red{background:var(--terra-soft);color:var(--terra)}
+.tag-gray{background:#EEF0EC;color:var(--ink-2)}
+
+/* 表单 */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;outline:none;background:#fff;
+  transition:border-color .15s,box-shadow .15s;
+}
+.field textarea{resize:vertical;min-height:68px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green-600);box-shadow:0 0 0 3px rgba(31,92,70,.12)}
+.field .hint{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.search-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search-bar input,.search-bar select{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;outline:none}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--green-600)}
+
+/* 表格 */
+.table-wrap{overflow-x:auto}
+table.data{width:100%;border-collapse:collapse;table-layout:fixed}
+table.data th{
+  text-align:left;font-size:11.5px;font-weight:600;color:var(--ink-3);letter-spacing:.4px;
+  padding:10px 14px;border-bottom:1px solid var(--line);background:#FAFBF9;white-space:nowrap;
+}
+table.data td{padding:11px 14px;border-bottom:1px solid #EEF0EC;font-size:13px;vertical-align:middle;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.data tr:last-child td{border-bottom:none}
+table.data tbody tr{transition:background .12s}
+table.data tbody tr:hover{background:#F7F9F5}
+table.data .col-actions{white-space:nowrap;overflow:visible}
+.empty-row td{text-align:center;color:var(--ink-3);padding:36px!important}
+
+/* 标签页 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--green-600);border-bottom-color:var(--green-600)}
+
+/* KPI 指标卡 */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.kpi{padding:18px 18px 16px;position:relative;overflow:hidden}
+.kpi-label{font-size:12px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:7px}
+.kpi-value{font-family:var(--mono);font-size:27px;font-weight:600;margin-top:9px;letter-spacing:-.8px}
+.kpi-meta{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+.kpi-meta .up{color:var(--green-600);font-weight:600}
+.kpi::after{content:"";position:absolute;right:-18px;top:-18px;width:72px;height:72px;border-radius:50%;background:var(--green-100);opacity:.55}
+.kpi.gold::after{background:var(--gold-100)}
+.kpi.terra::after{background:var(--terra-soft)}
+
+/* 图表网格 */
+.chart-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:22px}
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-box{height:320px;padding:8px 6px 4px}
+.chart-box.sm{height:280px}
+
+/* 模态框 */
+.modal-mask{
+  position:fixed;inset:0;background:rgba(18,30,25,.5);z-index:100;
+  display:none;align-items:flex-start;justify-content:center;padding:46px 18px;overflow-y:auto;
+}
+.modal-mask.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .2s ease}
+.modal.lg{max-width:860px}
+@keyframes modalIn{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:17px 22px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-size:15px;font-weight:700}
+.modal-close{font-size:20px;color:var(--ink-3);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#F0F2EE;color:var(--ink)}
+.modal-body{padding:22px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:15px 22px;border-top:1px solid var(--line);background:#FAFBF9;border-radius:0 0 12px 12px}
+
+/* 开单（POS）样式 */
+.pos-layout{display:grid;grid-template-columns:1fr 340px;gap:0}
+.pos-products{padding:18px;border-right:1px solid var(--line);max-height:640px;overflow-y:auto}
+.pos-cat{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.pos-cat button{padding:6px 13px;border-radius:20px;font-size:12.5px;font-weight:600;background:#F0F2EE;color:var(--ink-2)}
+.pos-cat button.on{background:var(--green-600);color:#fff}
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.prod-cell{border:1px solid var(--line);border-radius:9px;padding:11px 12px;text-align:left;transition:border-color .15s,background .15s}
+.prod-cell:hover{border-color:var(--green-600);background:#F5F8F4}
+.prod-cell .pname{font-size:13px;font-weight:600;display:block;margin-bottom:5px}
+.prod-cell .pprice{font-family:var(--mono);font-size:12.5px;color:var(--terra);font-weight:600}
+.prod-cell .pcost{font-size:11px;color:var(--ink-3);margin-top:2px}
+.pos-cart{padding:18px;background:#FAFBF9;display:flex;flex-direction:column;max-height:640px}
+.pos-cart h4{font-size:13px;margin-bottom:12px}
+.cart-lines{flex:1;overflow-y:auto;margin:0 -6px;padding:0 6px}
+.cart-line{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.cart-line .cl-name{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qty-ctl{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.qty-ctl button{width:24px;height:24px;font-weight:700;color:var(--green-600)}
+.qty-ctl span{min-width:26px;text-align:center;font-family:var(--mono);font-size:12.5px}
+.cl-price{font-family:var(--mono);font-size:12px;font-weight:600;min-width:62px;text-align:right}
+.cart-empty{color:var(--ink-3);font-size:12.5px;text-align:center;padding:40px 0}
+.pos-total{border-top:1px solid var(--line);padding-top:14px;margin-top:12px}
+.pos-total .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:7px}
+.pos-total .grand{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+.pos-total .grand b{font-family:var(--mono);font-size:24px;color:var(--terra)}
+
+/* 小票 */
+.receipt{font-family:var(--mono);font-size:12.5px;line-height:1.9;padding:6px 4px}
+.receipt .r-head{text-align:center;margin-bottom:12px}
+.receipt .r-head b{font-size:15px}
+.receipt .r-div{border-top:1px dashed #999;margin:9px 0}
+.receipt .r-line{display:flex;justify-content:space-between;gap:10px}
+.receipt .r-line .l{flex:1;min-width:0}
+.receipt .r-grand{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+.receipt .r-foot{text-align:center;color:var(--ink-3);margin-top:12px}
+
+/* 提示 toast */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--green-800);color:#fff;padding:11px 22px;border-radius:9px;font-size:13px;font-weight:600;
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 8px 24px rgba(0,0,0,.22)
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--terra)}
+
+/* 班次/展位卡片 */
+.entity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.entity-card{padding:16px}
+.entity-card h4{font-size:14px;font-weight:700;margin-bottom:8px}
+.entity-card .meta{font-size:12.5px;color:var(--ink-3);line-height:1.9}
+.entity-card .meta b{color:var(--ink-2);font-weight:600}
+
+/* 响应式 */
+@media (max-width:1100px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid,.chart-grid-2{grid-template-columns:1fr}
+  .entity-grid{grid-template-columns:repeat(2,1fr)}
+  .prod-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto}
+  .nav{display:grid;grid-template-columns:1fr 1fr}
+  .pos-layout{grid-template-columns:1fr}
+  .pos-products{border-right:none;border-bottom:1px solid var(--line)}
+  .field-row{grid-template-columns:1fr}
+  .content{padding:18px 14px 32px}
+  .topbar{padding:12px 14px}
+  .entity-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ================= 侧边栏导航 ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="34" height="34" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#1F5C46"/><path d="M9 22V10h3l4 7 4-7h3v12h-3v-7l-4 7-4-7v7z" fill="#D99A3D"/></svg>
+        <div>
+          <div class="brand-name">Foxcore</div>
+          <div class="brand-sub">Retail Tracking</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-group">业务工作台</div>
+      <button class="nav-item" data-route="#/dashboard">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        经营仪表盘
+      </button>
+      <button class="nav-item" data-route="#/sales">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        销售管理
+      </button>
+      <button class="nav-item" data-route="#/events">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        活动与展位
+      </button>
+      <button class="nav-item" data-route="#/reports">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        统计报表
+      </button>
+      <div class="nav-group">基础数据</div>
+      <button class="nav-item" data-route="#/base">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.7-4 3-9 3s-9-1.3-9-3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/></svg>
+        基础数据管理
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      Foxcore Retail 信息系统<br>系统分析与设计课程项目<br>XAMPP / MariaDB 原型实现
+    </div>
+  </aside>
+
+  <!-- ================= 主区域 ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">经营仪表盘</div>
+        <div class="page-crumb" id="pageCrumb">首页 / 经营概览</div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="role-switch">
+        <span class="role-dot"></span>
+        <label for="roleSelect">当前角色</label>
+        <select id="roleSelect">
+          <option value="admin">系统管理员</option>
+          <option value="event_manager">活动经理</option>
+          <option value="salesperson">销售人员</option>
+        </select>
+      </div>
+    </header>
+    <main class="content" id="viewRoot"><!-- 视图渲染挂载点 --></main>
+  </div>
+</div>
+
+<!-- ================= 通用模态框 ================= -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <h3 id="modalTitle">标题</h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   第一部分：数据层
+   模拟 MariaDB 中的 9 张数据表，浏览器端用 localStorage 持久化
+   CATEGORY / PRODUCT / VENUE / EVENT / BOOTH / SALESPERSON /
+   SALESPERSON_SHIFT / SALE / PRODUCT_SALE
+   ============================================================ */
+const STORE_KEY = 'foxcore_db_v1';
+const ROLE_KEY = 'foxcore_role_v1';
+
+/* 确定性伪随机数（保证每次重置生成的种子数据一致） */
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rnd = mulberry32(20261118);
+const pick = arr => arr[Math.floor(rnd() * arr.length)];
+const rint = (a,b) => Math.floor(rnd() * (b-a+1)) + a;
+
+/* ---------- 构建种子数据 ---------- */
+function buildSeed(){
+  const db = {categories:[],products:[],venues:[],events:[],booths:[],
+              salespersons:[],shifts:[],sales:[],productSales:[]};
+  let pid=0, vid=0, eid=0, bid=0, sid=0, shid=0, saleid=0, lineid=0;
+
+  /* 表4-1 CATEGORY */
+  const catNames = ['节日装饰','礼品礼盒','食品饮料','玩具文创','家居用品'];
+  catNames.forEach(t => db.categories.push({id:++pid, type:t}));
+
+  /* 表4-2 PRODUCT（name, wholesale_cost, min_price, category_id） */
+  const prodDefs = [
+    ['中秋灯笼挂饰',22,39,'节日装饰'],['玉兔彩灯摆件',18,32,'节日装饰'],
+    ['国旗主题拉花',8,15,'节日装饰'],['LED星星灯串',26,45,'节日装饰'],
+    ['团圆月饼礼盒(8枚装)',68,118,'礼品礼盒'],['坚果臻选礼盒',52,89,'礼品礼盒'],
+    ['高端茶礼套装',75,128,'礼品礼盒'],['节日香薰蜡烛礼盒',34,59,'礼品礼盒'],
+    ['桂花风味茶饮(6瓶)',19,33,'食品饮料'],['手工曲奇饼干盒',24,42,'食品饮料'],
+    ['节庆巧克力礼盒',31,55,'食品饮料'],
+    ['毛绒兔子公仔',28,49,'玩具文创'],['国潮盲盒手办',32,58,'玩具文创'],
+    ['节日主题拼图',21,38,'玩具文创'],
+    ['保暖绒毯礼盒',46,79,'家居用品'],['陶瓷马克杯对杯',27,48,'家居用品']
+  ];
+  prodDefs.forEach(([name,cost,price,cat]) => {
+    db.products.push({id:++vid, name, wholesale_cost:cost, min_price:price,
+      category_id: db.categories.find(c=>c.type===cat).id});
+  });
+
+  /* 表4-3 VENUE */
+  const venueDefs = [
+    ['长沙IFS国金中心','解放西路188号','长沙市','湖南省','410005','核心商圈旗舰购物中心，客流以年轻白领与游客为主'],
+    ['悦方ID Mall','坡子街2号','长沙市','湖南省','410002','临江商业综合体，节假日游客密集'],
+    ['德思勤城市广场','湘府中路18号','长沙市','湖南省','410004','城南大型综合体，家庭客群占比高'],
+    ['梅溪湖步步高购物中心','梅溪湖路1177号','长沙市','湖南省','410205','河西新区家庭与学生客群集中']
+  ];
+  venueDefs.forEach(([name,street,city,province,pcode,description]) =>
+    db.venues.push({id:++eid,name,street,city,province,pcode,description}));
+
+  /* 表4-4 EVENT */
+  const eventDefs = [
+    ['中秋团圆季促销','2026-09-23','2026-09-27','围绕中秋礼品与节日装饰开展的主题零售活动',
+     ['长沙IFS国金中心','悦方ID Mall']],
+    ['国庆黄金周展销','2026-10-01','2026-10-07','国庆长假跨场地大型展销，覆盖装饰、礼盒与食品',
+     ['长沙IFS国金中心','德思勤城市广场','梅溪湖步步高购物中心']],
+    ['双11购物节快闪','2026-11-08','2026-11-15','双11线下快闪，主打折扣礼盒与文创产品',
+     ['悦方ID Mall','德思勤城市广场']]
+  ];
+  const boothSpots = ['A区入口展位','中庭主展位','侧廊体验展位'];
+  eventDefs.forEach(([name,start_date,end_date,description,venueNames]) => {
+    const ev = {id:++bid,name,start_date,end_date,description,
+                venue_id: db.venues.find(v=>v.name===venueNames[0]).id};
+    db.events.push(ev);
+    /* 表4-5 BOOTH：每个活动场地布置 2-3 个展位 */
+    venueNames.forEach(vn => {
+      const vobj = db.venues.find(v=>v.name===vn);
+      const n = rint(2,3);
+      for(let k=0;k<n;k++){
+        db.booths.push({id:++sid, location:boothSpots[k]+'·'+vobj.name.slice(0,3),
+          event_id:ev.id, venue_id:vobj.id});
+      }
+    });
+  });
+
+  /* 表4-6 SALESPERSON */
+  const peopleDefs = [
+    ['新科','郑'],['婉清','李'],['浩然','王'],['思琪','陈'],['子墨','刘'],['晓燕','赵']
+  ];
+  peopleDefs.forEach(([first_name,last_name]) =>
+    db.salespersons.push({id:++shid,first_name,last_name,
+      street:'芙蓉中路'+rint(1,200)+'号',city:'长沙市',province:'湖南省',pcode:'410000'}));
+
+  /* 表4-7 SALESPERSON_SHIFT：活动期间每个展位每天一个班次 */
+  db.events.forEach(ev => {
+    const booths = db.booths.filter(b=>b.event_id===ev.id);
+    const start = new Date(ev.start_date), end = new Date(ev.end_date);
+    for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+      booths.forEach(b => {
+        db.shifts.push({
+          id:++saleid, date:d.toISOString().slice(0,10),
+          start_time: rnd()<.5?'09:00:00':'10:00:00',
+          end_time:'21:00:00',
+          salesperson_id: pick(db.salespersons).id,
+          booth_id:b.id, event_id:ev.id
+        });
+      });
+    }
+  });
+
+  /* 表4-8 SALE + 表4-9 PRODUCT_SALE：按班次生成历史销售单 */
+  db.shifts.forEach(sh => {
+    const orders = rint(1,4);
+    for(let o=0;o<orders;o++){
+      const hh = rint(10,20), mm = rint(0,59);
+      const sale = {id:++lineid,
+        sale_time: sh.date + ' ' + String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':00',
+        shift_id:sh.id};
+      db.sales.push(sale);
+      const lineCount = rint(1,4);
+      const chosen = new Set();
+      for(let k=0;k<lineCount;k++){
+        let prod;
+        do { prod = pick(db.products); } while(chosen.has(prod.id) && chosen.size<db.products.length);
+        chosen.add(prod.id);
+        const qty = rint(1,5);
+        /* 成交价：最低售价 ~ 最低售价×1.25，取整到角 */
+        const final_price = Math.round(prod.min_price * (1 + rnd()*0.25) * 10) / 10;
+        db.productSales.push({
+          line_no:db.productSales.length+1,
+          quantity:qty, final_price, sale_id:sale.id, product_id:prod.id
+        });
+      }
+    }
+  });
+  return db;
+}
+
+/* ---------- 存储与通用 CRUD ---------- */
+let DB = null;
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ DB = JSON.parse(raw); return; }
+  }catch(e){}
+  DB = buildSeed();
+  saveDB();
+}
+function saveDB(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+function nextId(arr){ return arr.reduce((m,r)=>Math.max(m,r.id||0),0)+1; }
+function resetData(){ DB = buildSeed(); saveDB(); }
+
+/* 实体查询辅助 */
+const byId = (arr,id) => arr.find(r=>r.id===id);
+function money(n){ return '¥' + Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function personName(p){ return p ? p.last_name + p.first_name : '—'; }
+function saleLines(saleId){ return DB.productSales.filter(l=>l.sale_id===saleId); }
+function saleTotal(saleId){
+  return saleLines(saleId).reduce((s,l)=>s+l.final_price*l.quantity,0);
+}
+function saleQty(saleId){ return saleLines(saleId).reduce((s,l)=>s+l.quantity,0); }
+
+/* 角色与权限（对应非功能性需求：身份认证与权限控制） */
+const ROLE_PERMS = {
+  admin:        {label:'系统管理员', routes:['#/dashboard','#/sales','#/events','#/reports','#/base'], canWrite:true},
+  event_manager:{label:'活动经理',   routes:['#/dashboard','#/sales','#/events','#/reports'],          canWrite:true},
+  salesperson:  {label:'销售人员',   routes:['#/dashboard','#/sales','#/reports'],                    canWrite:true}
+};
+let currentRole = localStorage.getItem(ROLE_KEY) || 'admin';
+</script>
+<script>
+/* ============================================================
+   第二部分：通用 UI 工具与 Hash 路由
+   ============================================================ */
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+let toastTimer = null;
+function toast(msg, isErr){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isErr?' err':'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.className='toast', 2400);
+}
+
+/* 模态框：返回 Promise，confirm 为 true 时等待确认 */
+function openModal(title, bodyHtml, footHtml, lg){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalFoot').innerHTML = footHtml ||
+    '<button class="btn btn-ghost" onclick="closeModal()">关闭</button>';
+  const box = document.getElementById('modalBox');
+  box.className = 'modal' + (lg?' lg':'');
+  document.getElementById('modalMask').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalMask').classList.remove('open'); }
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalMask').addEventListener('click', e => {
+  if(e.target.id==='modalMask') closeModal();
+});
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+/* 路由表 */
+/* 注意：render 用箭头函数延迟解析，因为各视图函数在后续 script 块中声明 */
+const ROUTES = {
+  '#/dashboard':{title:'经营仪表盘', crumb:'首页 / 经营概览', render:()=>renderDashboard()},
+  '#/sales':    {title:'销售管理',   crumb:'首页 / 销售管理', render:()=>renderSales()},
+  '#/events':   {title:'活动与展位', crumb:'首页 / 活动与展位', render:()=>renderEvents()},
+  '#/reports':  {title:'统计报表',   crumb:'首页 / 统计报表', render:()=>renderReports()},
+  '#/base':     {title:'基础数据管理',crumb:'首页 / 基础数据', render:()=>renderBase()}
+};
+let chartInsts = [];
+function disposeCharts(){ chartInsts.forEach(c=>c.dispose()); chartInsts=[]; }
+
+function router(){
+  let hash = location.hash || '#/dashboard';
+  if(!ROUTES[hash]) hash = '#/dashboard';
+  const perm = ROLE_PERMS[currentRole];
+  if(!perm.routes.includes(hash)) hash = '#/dashboard';
+  document.getElementById('pageTitle').textContent = ROUTES[hash].title;
+  document.getElementById('pageCrumb').textContent = ROUTES[hash].crumb;
+  document.querySelectorAll('.nav-item').forEach(n=>
+    n.classList.toggle('active', n.dataset.route===hash));
+  disposeCharts();
+  document.getElementById('viewRoot').innerHTML = '';
+  ROUTES[hash].render();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', router);
+
+/* 角色切换 */
+document.getElementById('roleSelect').value = currentRole;
+document.getElementById('roleSelect').addEventListener('change', e => {
+  currentRole = e.target.value;
+  localStorage.setItem(ROLE_KEY, currentRole);
+  applyRoleNav();
+  router();
+  toast('已切换角色：' + ROLE_PERMS[currentRole].label);
+});
+function applyRoleNav(){
+  const perm = ROLE_PERMS[currentRole];
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.style.display = perm.routes.includes(n.dataset.route) ? '' : 'none';
+  });
+  /* 分组下没有任何可见菜单项时，隐藏分组标题 */
+  document.querySelectorAll('.nav-group').forEach(g=>{
+    let hasVisible = false, el = g.nextElementSibling;
+    while(el && !el.classList.contains('nav-group')){
+      if(el.classList.contains('nav-item') && el.style.display!=='none'){
+        hasVisible = true; break;
+      }
+      el = el.nextElementSibling;
+    }
+    g.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+/* 导航点击：修改 hash 后由 hashchange 事件驱动 router */
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click', ()=>{ location.hash = n.dataset.route; });
+});
+
+/* ============================================================
+   第三部分：经营仪表盘
+   ============================================================ */
+function renderDashboard(){
+  const root = document.getElementById('viewRoot');
+  const allSales = DB.sales;
+  const totalRev = allSales.reduce((s,sl)=>s+saleTotal(sl.id),0);
+  const totalQty = allSales.reduce((s,sl)=>s+saleQty(sl.id),0);
+  const avgOrder = allSales.length ? totalRev/allSales.length : 0;
+
+  root.innerHTML = `
+    <div class="kpi-grid">
+      <div class="card kpi">
+        <div class="kpi-label">累计销售额</div>
+        <div class="kpi-value">${money(totalRev)}</div>
+        <div class="kpi-meta">覆盖 ${DB.events.length} 场活动 · ${DB.venues.length} 个场地</div>
+      </div>
+      <div class="card kpi gold">
+        <div class="kpi-label">销售单总数</div>
+        <div class="kpi-value num">${allSales.length}</div>
+        <div class="kpi-meta">平均客单价 <span class="up num">${money(avgOrder)}</span></div>
+      </div>
+      <div class="card kpi terra">
+        <div class="kpi-label">售出产品数量</div>
+        <div class="kpi-value num">${totalQty}</div>
+        <div class="kpi-meta">在售产品 ${DB.products.length} 种 · ${DB.categories.length} 个类别</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">在岗销售人员</div>
+        <div class="kpi-value num">${DB.salespersons.length}</div>
+        <div class="kpi-meta">累计班次 <span class="up num">${DB.shifts.length}</span> 个</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-head"><h3>每日销售趋势</h3><span class="sub">按销售单时间汇总销售额与订单数</span></div>
+        <div class="chart-box" id="chTrend"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>产品类别销售占比</h3><span class="sub">按销售额</span></div>
+        <div class="chart-box" id="chCat"></div>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-head"><h3>各活动销售对比</h3></div>
+        <div class="chart-box sm" id="chEvent"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>各场地销售对比</h3></div>
+        <div class="chart-box sm" id="chVenue"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>最近销售记录</h3>
+        <span class="sub">最新 8 笔销售单</span>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm" onclick="location.hash='#/sales'">查看全部</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data">
+          <colgroup><col style="width:13%"><col style="width:18%"><col style="width:17%"><col style="width:13%"><col style="width:13%"><col style="width:26%"></colgroup>
+          <thead><tr><th>销售单号</th><th>销售时间</th><th>活动</th><th>数量</th><th>金额</th><th>销售人员 / 展位</th></tr></thead>
+          <tbody id="recentRows"></tbody>
+        </table>
+      </div>
+    </div>`;
+
+  /* 最近记录表 */
+  const recent = [...allSales].sort((a,b)=>b.sale_time.localeCompare(a.sale_time)).slice(0,8);
+  document.getElementById('recentRows').innerHTML = recent.map(s=>{
+    const sh = byId(DB.shifts,s.shift_id);
+    const ev = sh ? byId(DB.events,sh.event_id) : null;
+    const sp = sh ? byId(DB.salespersons,sh.salesperson_id) : null;
+    const booth = sh ? byId(DB.booths,sh.booth_id) : null;
+    return `<tr>
+      <td class="num">SALE-${String(s.id).padStart(4,'0')}</td>
+      <td class="num">${esc(s.sale_time)}</td>
+      <td>${esc(ev?ev.name:'—')}</td>
+      <td class="num">${saleQty(s.id)}</td>
+      <td class="num" style="color:var(--terra);font-weight:600">${money(saleTotal(s.id))}</td>
+      <td>${esc(personName(sp))} · ${esc(booth?booth.location:'—')}</td>
+    </tr>`;
+  }).join('');
+
+  drawTrend();
+  drawCatPie();
+  drawEventBars();
+  drawVenueBars();
+}
+
+/* 销售趋势：按日期聚合 */
+function dailyAgg(){
+  const map = new Map();
+  DB.sales.forEach(s=>{
+    const day = s.sale_time.slice(0,10);
+    const cur = map.get(day) || {rev:0,orders:0};
+    cur.rev += saleTotal(s.id); cur.orders += 1;
+    map.set(day,cur);
+  });
+  return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+}
+function drawTrend(){
+  const data = dailyAgg();
+  const c = echarts.init(document.getElementById('chTrend'));
+  chartInsts.push(c);
+  c.setOption({
+    color:['#1F5C46','#D99A3D'],
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},
+      valueFormatter:v=>Number(v).toLocaleString('zh-CN',{maximumFractionDigits:2})},
+    legend:{data:['销售额','订单数'],right:10,top:4,textStyle:{fontSize:12}},
+    grid:{left:58,right:54,top:42,bottom:34},
+    xAxis:{type:'category',data:data.map(d=>d[0].slice(5)),
+      axisLine:{lineStyle:{color:'#C9CEC6'}},axisLabel:{color:'#78817B',fontSize:11}},
+    yAxis:[
+      {type:'value',name:'销售额(¥)',nameTextStyle:{color:'#78817B',fontSize:11},
+        splitLine:{lineStyle:{color:'#EFF1ED'}},axisLabel:{color:'#78817B',fontSize:11}},
+      {type:'value',name:'订单数',nameTextStyle:{color:'#78817B',fontSize:11},
+        splitLine:{show:false},axisLabel:{color:'#78817B',fontSize:11}}
+    ],
+    series:[
+      {name:'销售额',type:'bar',data:data.map(d=>Math.round(d[1].rev*100)/100),
+        barMaxWidth:22,itemStyle:{borderRadius:[4,4,0,0]}},
+      {name:'订单数',type:'line',yAxisIndex:1,smooth:true,
+        data:data.map(d=>d[1].orders),lineStyle:{width:2.5},
+        symbolSize:7,itemStyle:{color:'#D99A3D'}}
+    ]
+  });
+}
+
+/* 类别饼图 */
+function drawCatPie(){
+  const map = new Map();
+  DB.productSales.forEach(l=>{
+    const prod = byId(DB.products,l.product_id);
+    const cat = prod ? byId(DB.categories,prod.category_id) : null;
+    const key = cat ? cat.type : '其他';
+    map.set(key,(map.get(key)||0)+l.final_price*l.quantity);
+  });
+  const data = [...map.entries()].map(([name,value])=>({name,value:Math.round(value*100)/100}));
+  const c = echarts.init(document.getElementById('chCat'));
+  chartInsts.push(c);
+  c.setOption({
+    color:['#1F5C46','#D99A3D','#B8452C','#5B8C7B','#9A6A1F'],
+    tooltip:{trigger:'item',formatter:p=>`${p.name}<br>${money(p.value)} (${p.percent}%)`},
+    legend:{bottom:2,textStyle:{fontSize:11.5,color:'#46504A'},itemWidth:11,itemHeight:11},
+    series:[{type:'pie',radius:['42%','66%'],center:['50%','44%'],
+      avoidLabelOverlap:true,
+      itemStyle:{borderColor:'#fff',borderWidth:2},
+      label:{show:false},labelLine:{show:false},data}]
+  });
+}
+
+/* 活动对比柱状图 */
+function eventRevenue(evId){
+  const shiftIds = new Set(DB.shifts.filter(s=>s.event_id===evId).map(s=>s.id));
+  return DB.sales.filter(s=>shiftIds.has(s.shift_id))
+    .reduce((sum,s)=>sum+saleTotal(s.id),0);
+}
+function drawEventBars(){
+  const data = DB.events.map(ev=>({name:ev.name,rev:Math.round(eventRevenue(ev.id)*100)/100}));
+  const c = echarts.init(document.getElementById('chEvent'));
+  chartInsts.push(c);
+  c.setOption({
+    color:['#1F5C46'],
+    tooltip:{trigger:'axis',formatter:p=>`${p[0].name}<br>${money(p[0].value)}`},
+    grid:{left:54,right:20,top:24,bottom:54},
+    xAxis:{type:'category',data:data.map(d=>d.name),
+      axisLabel:{color:'#46504A',fontSize:11.5,interval:0,width:90,overflow:'break'},
+      axisLine:{lineStyle:{color:'#C9CEC6'}}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EFF1ED'}},
+      axisLabel:{color:'#78817B',fontSize:11}},
+    series:[{type:'bar',data:data.map(d=>d.rev),barMaxWidth:46,
+      itemStyle:{borderRadius:[6,6,0,0]},
+      label:{show:true,position:'top',color:'#46504A',fontSize:11,
+        formatter:p=>'¥'+Number(p.value).toLocaleString('zh-CN')}}]
+  });
+}
+
+/* 场地对比柱状图 */
+function drawVenueBars(){
+  const data = DB.venues.map(v=>{
+    const shiftIds = new Set(DB.shifts.filter(s=>{
+      const b = byId(DB.booths,s.booth_id);
+      return b && b.venue_id===v.id;
+    }).map(s=>s.id));
+    const rev = DB.sales.filter(s=>shiftIds.has(s.shift_id))
+      .reduce((sum,s)=>sum+saleTotal(s.id),0);
+    return {name:v.name,rev:Math.round(rev*100)/100};
+  });
+  const c = echarts.init(document.getElementById('chVenue'));
+  chartInsts.push(c);
+  c.setOption({
+    color:['#D99A3D'],
+    tooltip:{trigger:'axis',formatter:p=>`${p[0].name}<br>${money(p[0].value)}`},
+    grid:{left:54,right:20,top:24,bottom:64},
+    xAxis:{type:'category',data:data.map(d=>d.name),
+      axisLabel:{color:'#46504A',fontSize:11,interval:0,width:96,overflow:'break'},
+      axisLine:{lineStyle:{color:'#C9CEC6'}}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EFF1ED'}},
+      axisLabel:{color:'#78817B',fontSize:11}},
+    series:[{type:'bar',data:data.map(d=>d.rev),barMaxWidth:42,
+      itemStyle:{borderRadius:[6,6,0,0]},
+      label:{show:true,position:'top',color:'#46504A',fontSize:11,
+        formatter:p=>'¥'+Number(p.value).toLocaleString('zh-CN')}}]
+  });
+}
+</script>
+<script>
+/* ============================================================
+   第四部分：销售管理（销售单查询 + POS 实时开单 + 小票）
+   对应用例：记录销售 / 生成销售报表
+   ============================================================ */
+let salesFilter = {kw:'', eventId:'', venueId:''};
+
+function renderSales(){
+  const root = document.getElementById('viewRoot');
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-body">
+        <div class="search-bar">
+          <input type="text" id="fKw" placeholder="搜索销售单号" style="width:170px"
+            value="${esc(salesFilter.kw)}">
+          <select id="fEvent">
+            <option value="">全部活动</option>
+            ${DB.events.map(e=>`<option value="${e.id}" ${salesFilter.eventId==e.id?'selected':''}>${esc(e.name)}</option>`).join('')}
+          </select>
+          <select id="fVenue">
+            <option value="">全部场地</option>
+            ${DB.venues.map(v=>`<option value="${v.id}" ${salesFilter.venueId==v.id?'selected':''}>${esc(v.name)}</option>`).join('')}
+          </select>
+          <button class="btn btn-ghost btn-sm" id="fReset">重置筛选</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary" id="btnNewSale">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            记录销售（开单）
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>销售单列表</h3>
+        <span class="sub" id="saleCount"></span></div>
+      <div class="table-wrap">
+        <table class="data">
+          <colgroup><col style="width:11%"><col style="width:15%"><col style="width:15%"><col style="width:16%"><col style="width:10%"><col style="width:12%"><col style="width:21%"></colgroup>
+          <thead><tr><th>销售单号</th><th>销售时间</th><th>活动</th><th>展位</th><th>数量</th><th>销售金额</th><th>操作</th></tr></thead>
+          <tbody id="saleRows"></tbody>
+        </table>
+      </div>
+    </div>`;
+
+  document.getElementById('fKw').oninput = e=>{salesFilter.kw=e.target.value; drawSaleRows();};
+  document.getElementById('fEvent').onchange = e=>{salesFilter.eventId=e.target.value; drawSaleRows();};
+  document.getElementById('fVenue').onchange = e=>{salesFilter.venueId=e.target.value; drawSaleRows();};
+  document.getElementById('fReset').onclick = ()=>{
+    salesFilter={kw:'',eventId:'',venueId:''}; renderSales();
+  };
+  document.getElementById('btnNewSale').onclick = openPOS;
+  drawSaleRows();
+}
+
+function drawSaleRows(){
+  const kw = salesFilter.kw.trim().toLowerCase();
+  const rows = [...DB.sales].sort((a,b)=>b.sale_time.localeCompare(a.sale_time)).filter(s=>{
+    const sh = byId(DB.shifts,s.shift_id);
+    const booth = sh ? byId(DB.booths,sh.booth_id) : null;
+    if(kw && !('SALE-'+String(s.id).padStart(4,'0')).toLowerCase().includes(kw)) return false;
+    if(salesFilter.eventId && (!sh || sh.event_id != salesFilter.eventId)) return false;
+    if(salesFilter.venueId && (!booth || booth.venue_id != salesFilter.venueId)) return false;
+    return true;
+  });
+  document.getElementById('saleCount').textContent = '共 ' + rows.length + ' 笔销售单';
+  const tbody = document.getElementById('saleRows');
+  if(!rows.length){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">暂无符合条件的销售单</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(s=>{
+    const sh = byId(DB.shifts,s.shift_id);
+    const ev = sh ? byId(DB.events,sh.event_id) : null;
+    const booth = sh ? byId(DB.booths,sh.booth_id) : null;
+    return `<tr>
+      <td class="num">SALE-${String(s.id).padStart(4,'0')}</td>
+      <td class="num">${esc(s.sale_time)}</td>
+      <td><span class="tag tag-green">${esc(ev?ev.name:'—')}</span></td>
+      <td>${esc(booth?booth.location:'—')}</td>
+      <td class="num">${saleQty(s.id)}</td>
+      <td class="num" style="color:var(--terra);font-weight:600">${money(saleTotal(s.id))}</td>
+      <td class="col-actions">
+        <button class="btn btn-ghost btn-sm" onclick="showReceipt(${s.id})">查看小票</button>
+        <button class="icon-btn" title="删除销售单" onclick="deleteSale(${s.id})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </td></tr>`;
+  }).join('');
+}
+
+function deleteSale(id){
+  openModal('删除销售单',
+    `<p style="font-size:13.5px;line-height:1.8">确定要删除销售单 <b class="num">SALE-${String(id).padStart(4,'0')}</b> 吗？</p>
+     <p class="hint" style="color:var(--ink-3);font-size:12.5px;margin-top:8px">该销售单及其全部销售明细将一并删除，此操作不可恢复。</p>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-danger" id="confirmDelSale">确认删除</button>`);
+  document.getElementById('confirmDelSale').onclick = ()=>{
+    DB.productSales = DB.productSales.filter(l=>l.sale_id!==id);
+    DB.sales = DB.sales.filter(s=>s.id!==id);
+    saveDB(); closeModal();
+    if(location.hash==='#/sales') drawSaleRows();
+    toast('销售单已删除');
+  };
+}
+
+/* ---------- POS 开单 ---------- */
+let pos = null;
+function openPOS(){
+  if(!DB.booths.length){ toast('请先在活动管理中布置展位',true); return; }
+  pos = {shiftId:null, cart:new Map(), catFilter:0};
+  const firstBooth = DB.booths[0];
+  const sh = DB.shifts.find(s=>s.booth_id===firstBooth.id);
+  if(sh) pos.shiftId = sh.id;
+  openModal('记录销售（POS 开单）', posHtml(),
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-gold" id="posSubmit">确认提交并生成小票</button>`, true);
+  document.getElementById('posSubmit').onclick = submitPOS;
+  bindPOS();
+}
+function posHtml(){
+  const cats = [{id:0,type:'全部'},...DB.categories];
+  const prods = pos.catFilter ? DB.products.filter(p=>p.category_id===pos.catFilter) : DB.products;
+  return `
+  <div class="pos-layout">
+    <div class="pos-products">
+      <div class="field" style="margin-bottom:12px">
+        <label>选择班次（决定活动、展位与销售人员）</label>
+        <select id="posShift">
+          ${DB.shifts.map(s=>{
+            const b = byId(DB.booths,s.booth_id);
+            const sp = byId(DB.salespersons,s.salesperson_id);
+            return `<option value="${s.id}" ${pos.shiftId===s.id?'selected':''}>
+              ${esc(s.date)} ${esc(b?b.location:'')} / ${esc(personName(sp))}</option>`;
+          }).join('')}
+        </select>
+      </div>
+      <div class="pos-cat">
+        ${cats.map(c=>`<button class="${pos.catFilter===c.id?'on':''}" data-cat="${c.id}">${esc(c.type)}</button>`).join('')}
+      </div>
+      <div class="prod-grid">
+        ${prods.map(p=>`
+          <button class="prod-cell" data-prod="${p.id}">
+            <span class="pname">${esc(p.name)}</span>
+            <span class="pprice">${money(p.min_price)}</span>
+            <span class="pcost">成本 ${money(p.wholesale_cost)}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="pos-cart">
+      <h4>销售明细（购物车）</h4>
+      <div class="cart-lines" id="cartLines">${cartHtml()}</div>
+      <div class="pos-total">
+        <div class="row"><span>商品种类</span><span class="num">${pos.cart.size}</span></div>
+        <div class="row"><span>总数量</span><span class="num" id="cartQty">${cartQty()}</span></div>
+        <div class="grand"><span>合计金额</span><b class="num" id="cartGrand">${money(cartGrand())}</b></div>
+      </div>
+    </div>
+  </div>`;
+}
+function bindPOS(){
+  document.getElementById('posShift').onchange = e=>{pos.shiftId=Number(e.target.value);};
+  document.querySelectorAll('.pos-cat button').forEach(b=>b.onclick=()=>{
+    pos.catFilter=Number(b.dataset.cat); refreshPOS();
+  });
+  document.querySelectorAll('.prod-cell').forEach(b=>b.onclick=()=>{
+    const pid=Number(b.dataset.prod);
+    pos.cart.set(pid,(pos.cart.get(pid)||0)+1);
+    refreshPOS();
+  });
+}
+function refreshPOS(){
+  document.getElementById('modalBody').innerHTML = posHtml();
+  bindPOS();
+}
+function cartQty(){
+  return [...pos.cart.values()].reduce((a,b)=>a+b,0);
+}
+function cartGrand(){
+  let g=0;
+  pos.cart.forEach((qty,pid)=>{
+    const p = byId(DB.products,pid);
+    if(p) g += p.min_price*qty;
+  });
+  return Math.round(g*100)/100;
+}
+function cartHtml(){
+  if(!pos.cart.size) return '<div class="cart-empty">尚未添加产品，点击左侧产品加入</div>';
+  return [...pos.cart.entries()].map(([pid,qty])=>{
+    const p = byId(DB.products,pid);
+    return `<div class="cart-line">
+      <span class="cl-name">${esc(p.name)}</span>
+      <div class="qty-ctl">
+        <button onclick="cartStep(${pid},-1)">−</button>
+        <span class="num">${qty}</span>
+        <button onclick="cartStep(${pid},1)">+</button>
+      </div>
+      <span class="cl-price">${money(p.min_price*qty)}</span>
+    </div>`;
+  }).join('');
+}
+function cartStep(pid,d){
+  const v = (pos.cart.get(pid)||0)+d;
+  if(v<=0) pos.cart.delete(pid); else pos.cart.set(pid,v);
+  refreshPOS();
+}
+
+/* 提交销售单：对应“记录销售”用例基本路径 5-6 */
+function submitPOS(){
+  if(!pos.shiftId){ toast('请选择班次',true); return; }
+  if(!pos.cart.size){ toast('请至少添加一种产品',true); return; }
+  const sh = byId(DB.shifts,pos.shiftId);
+  const now = new Date();
+  const saleTime = sh.date + ' ' +
+    String(now.getHours()).padStart(2,'0')+':'+
+    String(now.getMinutes()).padStart(2,'0')+':'+
+    String(now.getSeconds()).padStart(2,'0');
+  const sale = {id:nextId(DB.sales), sale_time:saleTime, shift_id:pos.shiftId};
+  DB.sales.push(sale);
+  pos.cart.forEach((qty,pid)=>{
+    const p = byId(DB.products,pid);
+    if(qty<=0) return;  /* 拓展路径 2a：数量无效 */
+    DB.productSales.push({
+      line_no:DB.productSales.length+1, quantity:qty,
+      final_price:p.min_price, sale_id:sale.id, product_id:pid
+    });
+  });
+  saveDB();
+  closeModal();
+  toast('销售单已生成：SALE-' + String(sale.id).padStart(4,'0'));
+  if(location.hash==='#/sales') drawSaleRows();
+  showReceipt(sale.id);
+}
+
+/* ---------- 销售小票 ---------- */
+function showReceipt(saleId){
+  const s = byId(DB.sales,saleId);
+  if(!s) return;
+  const sh = byId(DB.shifts,s.shift_id);
+  const ev = sh ? byId(DB.events,sh.event_id) : null;
+  const booth = sh ? byId(DB.booths,sh.booth_id) : null;
+  const sp = sh ? byId(DB.salespersons,sh.salesperson_id) : null;
+  const lines = saleLines(saleId);
+  const body = `
+  <div class="receipt">
+    <div class="r-head">
+      <b>FOXCORE RETAIL</b><br>零售活动销售小票
+    </div>
+    <div class="r-line"><span>单号</span><span>SALE-${String(s.id).padStart(4,'0')}</span></div>
+    <div class="r-line"><span>时间</span><span>${esc(s.sale_time)}</span></div>
+    <div class="r-line"><span>活动</span><span>${esc(ev?ev.name:'—')}</span></div>
+    <div class="r-line"><span>展位</span><span>${esc(booth?booth.location:'—')}</span></div>
+    <div class="r-line"><span>销售员</span><span>${esc(personName(sp))}</span></div>
+    <div class="r-div"></div>
+    ${lines.map(l=>{
+      const p = byId(DB.products,l.product_id);
+      return `<div class="r-line">
+        <span class="l">${esc(p.name)} ×${l.quantity} @${money(l.final_price)}</span>
+        <span>${money(l.final_price*l.quantity)}</span></div>`;
+    }).join('')}
+    <div class="r-div"></div>
+    <div class="r-line"><span>总数量</span><span>${saleQty(saleId)}</span></div>
+    <div class="r-grand"><span>应收合计</span><span>${money(saleTotal(saleId))}</span></div>
+    <div class="r-foot">感谢您的光临 · 请妥善保管本小票<br>退换货需凭此小票办理</div>
+  </div>`;
+  openModal('销售小票', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+     <button class="btn btn-primary" onclick="window.print()">打印小票</button>`);
+}
+</script>
+<script>
+/* ============================================================
+   第五部分：活动管理（活动 / 展位 / 班次）
+   对应用例：管理活动、安排班次
+   ============================================================ */
+let eventTab = 'event';
+let eventSubFilter = '';
+
+function renderEvents(){
+  const root = document.getElementById('viewRoot');
+  root.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${eventTab==='event'?'active':''}" data-t="event">活动管理</button>
+      <button class="tab ${eventTab==='booth'?'active':''}" data-t="booth">展位布置</button>
+      <button class="tab ${eventTab==='shift'?'active':''}" data-t="shift">班次安排</button>
+    </div>
+    <div id="eventTabBody"></div>`;
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.onclick=()=>{
+    eventTab=t.dataset.t; renderEvents();
+  });
+  if(eventTab==='event') drawEventTab();
+  if(eventTab==='booth') drawBoothTab();
+  if(eventTab==='shift') drawShiftTab();
+}
+
+/* ---------- 活动 ---------- */
+function drawEventTab(){
+  const body = document.getElementById('eventTabBody');
+  body.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="btn btn-primary" id="newEventBtn">新建活动</button>
+    </div>
+    <div class="entity-grid">
+      ${DB.events.map(ev=>{
+        const venue = byId(DB.venues,ev.venue_id);
+        const boothCount = DB.booths.filter(b=>b.event_id===ev.id).length;
+        const shiftCount = DB.shifts.filter(s=>s.event_id===ev.id).length;
+        const rev = eventRevenue(ev.id);
+        return `<div class="card entity-card">
+          <h4>${esc(ev.name)}</h4>
+          <div class="meta">
+            <div><b>日期：</b><span class="num">${esc(ev.start_date)} ~ ${esc(ev.end_date)}</span></div>
+            <div><b>主场地：</b>${esc(venue?venue.name:'—')}</div>
+            <div><b>展位：</b>${boothCount} 个 · <b>班次：</b>${shiftCount} 个</div>
+            <div><b>累计销售：</b><span style="color:var(--terra)">${money(rev)}</span></div>
+            <div style="margin-top:8px;color:var(--ink-3)">${esc(ev.description)}</div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="editEvent(${ev.id})">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteEvent(${ev.id})">删除</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  document.getElementById('newEventBtn').onclick = ()=>eventForm(null);
+}
+function eventForm(ev){
+  const isEdit = !!ev;
+  const body = `
+    <div class="field"><label>活动名称</label>
+      <input id="evName" value="${esc(ev?ev.name:'')}" placeholder="如：圣诞季促销"></div>
+    <div class="field-row">
+      <div class="field"><label>开始日期</label>
+        <input type="date" id="evStart" value="${esc(ev?ev.start_date:'')}"></div>
+      <div class="field"><label>结束日期</label>
+        <input type="date" id="evEnd" value="${esc(ev?ev.end_date:'')}"></div>
+    </div>
+    <div class="field"><label>举办场地</label>
+      <select id="evVenue">
+        ${DB.venues.map(v=>`<option value="${v.id}" ${ev&&ev.venue_id===v.id?'selected':''}>${esc(v.name)}</option>`).join('')}
+      </select></div>
+    <div class="field"><label>活动说明</label>
+      <textarea id="evDesc">${esc(ev?ev.description:'')}</textarea></div>`;
+  openModal(isEdit?'编辑活动':'新建活动', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="evSave">保存</button>`);
+  document.getElementById('evSave').onclick = ()=>{
+    const name = document.getElementById('evName').value.trim();
+    const sd = document.getElementById('evStart').value;
+    const ed = document.getElementById('evEnd').value;
+    if(!name){ toast('请填写活动名称',true); return; }
+    if(!sd||!ed){ toast('请选择起止日期',true); return; }
+    if(sd > ed){ toast('开始日期不能晚于结束日期',true); return; } /* 拓展路径 1a */
+    const data = {name, start_date:sd, end_date:ed,
+      description:document.getElementById('evDesc').value.trim(),
+      venue_id:Number(document.getElementById('evVenue').value)};
+    if(isEdit) Object.assign(ev,data);
+    else DB.events.push({id:nextId(DB.events),...data});
+    saveDB(); closeModal();
+    if(location.hash==='#/events') drawEventTab();
+    toast(isEdit?'活动已更新':'活动已创建');
+  };
+}
+function editEvent(id){ eventForm(byId(DB.events,id)); }
+function deleteEvent(id){
+  if(DB.booths.some(b=>b.event_id===id)){
+    toast('该活动下存在展位，无法删除（请先删除相关展位）',true); return;
+  }
+  if(DB.shifts.some(s=>s.event_id===id)){
+    toast('该活动下存在班次，无法删除',true); return;
+  }
+  confirmDelete('活动', DB.events, id, drawEventTab);
+}
+
+/* ---------- 展位 ---------- */
+function drawBoothTab(){
+  const body = document.getElementById('eventTabBody');
+  body.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body search-bar">
+        <select id="boothFilter">
+          <option value="">全部活动</option>
+          ${DB.events.map(e=>`<option value="${e.id}" ${eventSubFilter==e.id?'selected':''}>${esc(e.name)}</option>`).join('')}
+        </select>
+        <div style="flex:1"></div>
+        <button class="btn btn-primary" id="newBoothBtn">新建展位</button>
+      </div>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:10%"><col style="width:24%"><col style="width:22%"><col style="width:24%"><col style="width:20%"></colgroup>
+        <thead><tr><th>展位编号</th><th>展位位置</th><th>所属活动</th><th>所属场地</th><th>操作</th></tr></thead>
+        <tbody id="boothRows"></tbody>
+      </table>
+    </div>`;
+  document.getElementById('boothFilter').onchange = e=>{
+    eventSubFilter=e.target.value; drawBoothRows();
+  };
+  document.getElementById('newBoothBtn').onclick = ()=>boothForm(null);
+  drawBoothRows();
+}
+function drawBoothRows(){
+  const rows = eventSubFilter ? DB.booths.filter(b=>b.event_id==eventSubFilter) : DB.booths;
+  const tbody = document.getElementById('boothRows');
+  if(!rows.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">暂无展位</td></tr>'; return; }
+  tbody.innerHTML = rows.map(b=>{
+    const ev = byId(DB.events,b.event_id), v = byId(DB.venues,b.venue_id);
+    return `<tr>
+      <td class="num">B-${String(b.id).padStart(3,'0')}</td>
+      <td>${esc(b.location)}</td>
+      <td><span class="tag tag-green">${esc(ev?ev.name:'—')}</span></td>
+      <td>${esc(v?v.name:'—')}</td>
+      <td class="col-actions">
+        <button class="btn btn-ghost btn-sm" onclick="boothForm(${b.id})">编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBooth(${b.id})">删除</button>
+      </td></tr>`;
+  }).join('');
+}
+function boothForm(id){
+  const b = id ? byId(DB.booths,id) : null;
+  const body = `
+    <div class="field"><label>展位位置</label>
+      <input id="bhLoc" value="${esc(b?b.location:'')}" placeholder="如：中庭主展位"></div>
+    <div class="field"><label>所属活动</label>
+      <select id="bhEvent">
+        ${DB.events.map(e=>`<option value="${e.id}" ${b&&b.event_id===e.id?'selected':''}>${esc(e.name)}</option>`).join('')}
+      </select></div>
+    <div class="field"><label>所属场地</label>
+      <select id="bhVenue">
+        ${DB.venues.map(v=>`<option value="${v.id}" ${b&&b.venue_id===v.id?'selected':''}>${esc(v.name)}</option>`).join('')}
+      </select></div>`;
+  openModal(b?'编辑展位':'新建展位', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="bhSave">保存</button>`);
+  document.getElementById('bhSave').onclick = ()=>{
+    const location = document.getElementById('bhLoc').value.trim();
+    if(!location){ toast('请填写展位位置',true); return; }
+    const data = {location,
+      event_id:Number(document.getElementById('bhEvent').value),
+      venue_id:Number(document.getElementById('bhVenue').value)};
+    if(b) Object.assign(b,data);
+    else DB.booths.push({id:nextId(DB.booths),...data});
+    saveDB(); closeModal(); drawBoothRows();
+    toast(b?'展位已更新':'展位已创建');
+  };
+}
+function deleteBooth(id){
+  if(DB.shifts.some(s=>s.booth_id===id)){
+    toast('该展位已安排班次，无法删除',true); return;
+  }
+  confirmDelete('展位', DB.booths, id, drawBoothRows);
+}
+
+/* ---------- 班次 ---------- */
+function drawShiftTab(){
+  const body = document.getElementById('eventTabBody');
+  body.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body search-bar">
+        <select id="shiftFilter">
+          <option value="">全部活动</option>
+          ${DB.events.map(e=>`<option value="${e.id}" ${eventSubFilter==e.id?'selected':''}>${esc(e.name)}</option>`).join('')}
+        </select>
+        <div style="flex:1"></div>
+        <button class="btn btn-primary" id="newShiftBtn">安排班次</button>
+      </div>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:9%"><col style="width:12%"><col style="width:15%"><col style="width:18%"><col style="width:15%"><col style="width:14%"><col style="width:17%"></colgroup>
+        <thead><tr><th>班次号</th><th>日期</th><th>起止时间</th><th>展位</th><th>销售人员</th><th>活动</th><th>操作</th></tr></thead>
+        <tbody id="shiftRows"></tbody>
+      </table>
+    </div>`;
+  document.getElementById('shiftFilter').onchange = e=>{
+    eventSubFilter=e.target.value; drawShiftRows();
+  };
+  document.getElementById('newShiftBtn').onclick = ()=>shiftForm(null);
+  drawShiftRows();
+}
+function drawShiftRows(){
+  const rows = eventSubFilter ? DB.shifts.filter(s=>s.event_id==eventSubFilter) : DB.shifts;
+  const sorted = [...rows].sort((a,b)=>
+    (b.date+b.start_time).localeCompare(a.date+a.start_time));
+  const tbody = document.getElementById('shiftRows');
+  if(!sorted.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="7">暂无班次</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(s=>{
+    const b = byId(DB.booths,s.booth_id);
+    const sp = byId(DB.salespersons,s.salesperson_id);
+    const ev = byId(DB.events,s.event_id);
+    return `<tr>
+      <td class="num">SH-${String(s.id).padStart(3,'0')}</td>
+      <td class="num">${esc(s.date)}</td>
+      <td class="num">${esc(s.start_time.slice(0,5))}–${esc(s.end_time.slice(0,5))}</td>
+      <td>${esc(b?b.location:'—')}</td>
+      <td>${esc(personName(sp))}</td>
+      <td><span class="tag tag-gold">${esc(ev?ev.name:'—')}</span></td>
+      <td class="col-actions">
+        <button class="btn btn-ghost btn-sm" onclick="shiftForm(${s.id})">编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteShiftRow(${s.id})">删除</button>
+      </td></tr>`;
+  }).join('');
+}
+function shiftForm(id){
+  const sh = id ? byId(DB.shifts,id) : null;
+  const body = `
+    <div class="field-row">
+      <div class="field"><label>日期</label>
+        <input type="date" id="shDate" value="${esc(sh?sh.date:'')}"></div>
+      <div class="field"><label>展位</label>
+        <select id="shBooth">
+          ${DB.booths.map(b=>`<option value="${b.id}" ${sh&&sh.booth_id===b.id?'selected':''}>${esc(b.location)}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>开始时间</label>
+        <input type="time" id="shStart" value="${esc(sh?sh.start_time.slice(0,5):'09:00')}"></div>
+      <div class="field"><label>结束时间</label>
+        <input type="time" id="shEnd" value="${esc(sh?sh.end_time.slice(0,5):'21:00')}"></div>
+    </div>
+    <div class="field"><label>销售人员</label>
+      <select id="shPerson">
+        ${DB.salespersons.map(p=>`<option value="${p.id}" ${sh&&sh.salesperson_id===p.id?'selected':''}>${esc(personName(p))}</option>`).join('')}
+      </select></div>`;
+  openModal(sh?'编辑班次':'安排班次', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="shSave">保存</button>`);
+  document.getElementById('shSave').onclick = ()=>{
+    const date = document.getElementById('shDate').value;
+    const st = document.getElementById('shStart').value;
+    const et = document.getElementById('shEnd').value;
+    const boothId = Number(document.getElementById('shBooth').value);
+    const personId = Number(document.getElementById('shPerson').value);
+    if(!date){ toast('请选择日期',true); return; }
+    if(st >= et){ toast('结束时间必须晚于开始时间',true); return; }
+    /* 拓展路径 2a：同一人员同一时间段冲突检测 */
+    const conflict = DB.shifts.find(x=>x.id!==id && x.date===date &&
+      x.salesperson_id===personId && !(et<=x.start_time || st>=x.end_time));
+    if(conflict){ toast('该销售人员此时段已有班次，时间冲突',true); return; }
+    const booth = byId(DB.booths,boothId);
+    const data = {date, start_time:st+':00', end_time:et+':00',
+      salesperson_id:personId, booth_id:boothId, event_id:booth.event_id};
+    if(sh) Object.assign(sh,data);
+    else DB.shifts.push({id:nextId(DB.shifts),...data});
+    saveDB(); closeModal(); drawShiftRows();
+    toast(sh?'班次已更新':'班次已安排');
+  };
+}
+function deleteShiftRow(id){
+  if(DB.sales.some(s=>s.shift_id===id)){
+    toast('该班次下已有销售单，无法删除',true); return;
+  }
+  confirmDelete('班次', DB.shifts, id, drawShiftRows);
+}
+
+/* 通用删除确认 */
+function confirmDelete(label, arr, id, redraw){
+  openModal('删除确认',
+    `<p style="font-size:13.5px">确定删除该${label}吗？此操作不可恢复。</p>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-danger" id="cfDel">确认删除</button>`);
+  document.getElementById('cfDel').onclick = ()=>{
+    const idx = arr.findIndex(r=>r.id===id);
+    if(idx>=0) arr.splice(idx,1);
+    saveDB(); closeModal(); redraw();
+    toast(label+'已删除');
+  };
+}
+</script>
+<script>
+/* ============================================================
+   第六部分：基础数据管理
+   对应用例：管理产品与类别，维护场地、销售人员
+   ============================================================ */
+let baseTab = 'product';
+function renderBase(){
+  const root = document.getElementById('viewRoot');
+  root.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${baseTab==='product'?'active':''}" data-t="product">产品</button>
+      <button class="tab ${baseTab==='category'?'active':''}" data-t="category">产品类别</button>
+      <button class="tab ${baseTab==='venue'?'active':''}" data-t="venue">场地</button>
+      <button class="tab ${baseTab==='salesperson'?'active':''}" data-t="salesperson">销售人员</button>
+    </div>
+    <div id="baseTabBody"></div>`;
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.onclick=()=>{
+    baseTab=t.dataset.t; renderBase();
+  });
+  if(baseTab==='product') drawProductTab();
+  if(baseTab==='category') drawCategoryTab();
+  if(baseTab==='venue') drawVenueTab();
+  if(baseTab==='salesperson') drawPersonTab();
+}
+
+/* ---------- 产品 ---------- */
+function drawProductTab(){
+  const body = document.getElementById('baseTabBody');
+  body.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="btn btn-primary" id="newProd">新增产品</button>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:9%"><col style="width:21%"><col style="width:15%"><col style="width:14%"><col style="width:14%"><col style="width:27%"></colgroup>
+        <thead><tr><th>编号</th><th>产品名称</th><th>所属类别</th><th>批发成本</th><th>最低售价</th><th>操作</th></tr></thead>
+        <tbody>
+          ${DB.products.map(p=>{
+            const c = byId(DB.categories,p.category_id);
+            return `<tr>
+              <td class="num">P-${String(p.id).padStart(3,'0')}</td>
+              <td>${esc(p.name)}</td>
+              <td><span class="tag tag-gray">${esc(c?c.type:'—')}</span></td>
+              <td class="num">${money(p.wholesale_cost)}</td>
+              <td class="num" style="color:var(--terra)">${money(p.min_price)}</td>
+              <td class="col-actions">
+                <button class="btn btn-ghost btn-sm" onclick="productForm(${p.id})">编辑</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">删除</button>
+              </td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  document.getElementById('newProd').onclick = ()=>productForm(null);
+}
+function productForm(id){
+  const p = id ? byId(DB.products,id) : null;
+  const body = `
+    <div class="field"><label>产品名称</label>
+      <input id="pdName" value="${esc(p?p.name:'')}"></div>
+    <div class="field"><label>所属类别</label>
+      <select id="pdCat">
+        ${DB.categories.map(c=>`<option value="${c.id}" ${p&&p.category_id===c.id?'selected':''}>${esc(c.type)}</option>`).join('')}
+      </select></div>
+    <div class="field-row">
+      <div class="field"><label>批发成本（元）</label>
+        <input type="number" min="0" step="0.01" id="pdCost" value="${p?p.wholesale_cost:''}"></div>
+      <div class="field"><label>最低售价（元）</label>
+        <input type="number" min="0" step="0.01" id="pdPrice" value="${p?p.min_price:''}"></div>
+    </div>
+    <p class="hint">成交价不得低于最低售价；成本与售价均须为大于 0 的有效数字。</p>`;
+  openModal(p?'编辑产品':'新增产品', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="pdSave">保存</button>`);
+  document.getElementById('pdSave').onclick = ()=>{
+    const name = document.getElementById('pdName').value.trim();
+    const cost = Number(document.getElementById('pdCost').value);
+    const price = Number(document.getElementById('pdPrice').value);
+    if(!name){ toast('请填写产品名称',true); return; }
+    if(!(cost>0)||!(price>0)){ toast('成本与售价须为大于 0 的有效数字',true); return; }
+    if(price < cost){ toast('最低售价不应低于批发成本',true); return; }
+    const data = {name, wholesale_cost:cost, min_price:price,
+      category_id:Number(document.getElementById('pdCat').value)};
+    if(p) Object.assign(p,data);
+    else DB.products.push({id:nextId(DB.products),...data});
+    saveDB(); closeModal(); drawProductTab();
+    toast(p?'产品已更新':'产品已新增');
+  };
+}
+function deleteProduct(id){
+  if(DB.productSales.some(l=>l.product_id===id)){
+    toast('该产品已存在销售明细，无法删除',true); return;
+  }
+  confirmDelete('产品', DB.products, id, drawProductTab);
+}
+
+/* ---------- 类别 ---------- */
+function drawCategoryTab(){
+  const body = document.getElementById('baseTabBody');
+  body.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="btn btn-primary" id="newCat">新增类别</button>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:14%"><col style="width:30%"><col style="width:28%"><col style="width:28%"></colgroup>
+        <thead><tr><th>类别编号</th><th>类别名称</th><th>产品数量</th><th>操作</th></tr></thead>
+        <tbody>
+          ${DB.categories.map(c=>{
+            const n = DB.products.filter(p=>p.category_id===c.id).length;
+            return `<tr>
+              <td class="num">C-${String(c.id).padStart(3,'0')}</td>
+              <td>${esc(c.type)}</td>
+              <td class="num">${n} 种</td>
+              <td class="col-actions">
+                <button class="btn btn-ghost btn-sm" onclick="categoryForm(${c.id})">编辑</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">删除</button>
+              </td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  document.getElementById('newCat').onclick = ()=>categoryForm(null);
+}
+function categoryForm(id){
+  const c = id ? byId(DB.categories,id) : null;
+  const body = `<div class="field"><label>类别名称</label>
+    <input id="ctName" value="${esc(c?c.type:'')}" placeholder="如：节日装饰"></div>`;
+  openModal(c?'编辑类别':'新增类别', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="ctSave">保存</button>`);
+  document.getElementById('ctSave').onclick = ()=>{
+    const type = document.getElementById('ctName').value.trim();
+    if(!type){ toast('请填写类别名称',true); return; }
+    if(c) c.type=type;
+    else DB.categories.push({id:nextId(DB.categories),type});
+    saveDB(); closeModal(); drawCategoryTab();
+    toast(c?'类别已更新':'类别已新增');
+  };
+}
+function deleteCategory(id){
+  if(DB.products.some(p=>p.category_id===id)){
+    toast('该类别下存在产品，无法删除',true); return; /* 拓展路径 1a */
+  }
+  confirmDelete('类别', DB.categories, id, drawCategoryTab);
+}
+
+/* ---------- 场地 ---------- */
+function drawVenueTab(){
+  const body = document.getElementById('baseTabBody');
+  body.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="btn btn-primary" id="newVenue">新增场地</button>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:8%"><col style="width:17%"><col style="width:17%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:29%"></colgroup>
+        <thead><tr><th>编号</th><th>场地名称</th><th>街道</th><th>城市</th><th>省份</th><th>邮编</th><th>操作</th></tr></thead>
+        <tbody>
+          ${DB.venues.map(v=>`<tr>
+            <td class="num">V-${String(v.id).padStart(3,'0')}</td>
+            <td>${esc(v.name)}</td>
+            <td>${esc(v.street)}</td>
+            <td>${esc(v.city)}</td>
+            <td>${esc(v.province)}</td>
+            <td class="num">${esc(v.pcode)}</td>
+            <td class="col-actions">
+              <button class="btn btn-ghost btn-sm" onclick="venueForm(${v.id})">编辑</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteVenue(${v.id})">删除</button>
+            </td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  document.getElementById('newVenue').onclick = ()=>venueForm(null);
+}
+function venueForm(id){
+  const v = id ? byId(DB.venues,id) : null;
+  const body = `
+    <div class="field"><label>场地名称</label>
+      <input id="vnName" value="${esc(v?v.name:'')}"></div>
+    <div class="field"><label>街道</label>
+      <input id="vnStreet" value="${esc(v?v.street:'')}"></div>
+    <div class="field-row">
+      <div class="field"><label>城市</label>
+        <input id="vnCity" value="${esc(v?v.city:'')}"></div>
+      <div class="field"><label>省份</label>
+        <input id="vnProv" value="${esc(v?v.province:'')}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>邮编</label>
+        <input id="vnPcode" value="${esc(v?v.pcode:'')}"></div>
+    </div>
+    <div class="field"><label>场地描述</label>
+      <textarea id="vnDesc">${esc(v?v.description:'')}</textarea></div>`;
+  openModal(v?'编辑场地':'新增场地', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="vnSave">保存</button>`);
+  document.getElementById('vnSave').onclick = ()=>{
+    const name = document.getElementById('vnName').value.trim();
+    if(!name){ toast('请填写场地名称',true); return; }
+    const data = {name,
+      street:document.getElementById('vnStreet').value.trim(),
+      city:document.getElementById('vnCity').value.trim(),
+      province:document.getElementById('vnProv').value.trim(),
+      pcode:document.getElementById('vnPcode').value.trim(),
+      description:document.getElementById('vnDesc').value.trim()};
+    if(v) Object.assign(v,data);
+    else DB.venues.push({id:nextId(DB.venues),...data});
+    saveDB(); closeModal(); drawVenueTab();
+    toast(v?'场地已更新':'场地已新增');
+  };
+}
+function deleteVenue(id){
+  if(DB.booths.some(b=>b.venue_id===id)||DB.events.some(e=>e.venue_id===id)){
+    toast('该场地已被活动或展位引用，无法删除',true); return;
+  }
+  confirmDelete('场地', DB.venues, id, drawVenueTab);
+}
+
+/* ---------- 销售人员 ---------- */
+function drawPersonTab(){
+  const body = document.getElementById('baseTabBody');
+  body.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="btn btn-primary" id="newPerson">新增人员</button>
+    </div>
+    <div class="card table-wrap">
+      <table class="data">
+        <colgroup><col style="width:9%"><col style="width:14%"><col style="width:14%"><col style="width:27%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup>
+        <thead><tr><th>编号</th><th>姓</th><th>名</th><th>街道</th><th>城市</th><th>省份</th><th>操作</th></tr></thead>
+        <tbody>
+          ${DB.salespersons.map(p=>`<tr>
+            <td class="num">S-${String(p.id).padStart(3,'0')}</td>
+            <td>${esc(p.last_name)}</td>
+            <td>${esc(p.first_name)}</td>
+            <td>${esc(p.street)}</td>
+            <td>${esc(p.city)}</td>
+            <td>${esc(p.province)}</td>
+            <td class="col-actions">
+              <button class="btn btn-ghost btn-sm" onclick="personForm(${p.id})">编辑</button>
+              <button class="btn btn-danger btn-sm" onclick="deletePerson(${p.id})">删除</button>
+            </td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  document.getElementById('newPerson').onclick = ()=>personForm(null);
+}
+function personForm(id){
+  const p = id ? byId(DB.salespersons,id) : null;
+  const body = `
+    <div class="field-row">
+      <div class="field"><label>姓</label>
+        <input id="psLast" value="${esc(p?p.last_name:'')}"></div>
+      <div class="field"><label>名</label>
+        <input id="psFirst" value="${esc(p?p.first_name:'')}"></div>
+    </div>
+    <div class="field"><label>街道</label>
+      <input id="psStreet" value="${esc(p?p.street:'')}"></div>
+    <div class="field-row">
+      <div class="field"><label>城市</label>
+        <input id="psCity" value="${esc(p?p.city:'')}"></div>
+      <div class="field"><label>省份</label>
+        <input id="psProv" value="${esc(p?p.province:'')}"></div>
+    </div>
+    <div class="field"><label>邮编</label>
+      <input id="psPcode" value="${esc(p?p.pcode:'')}"></div>`;
+  openModal(p?'编辑销售人员':'新增销售人员', body,
+    `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" id="psSave">保存</button>`);
+  document.getElementById('psSave').onclick = ()=>{
+    const last_name = document.getElementById('psLast').value.trim();
+    const first_name = document.getElementById('psFirst').value.trim();
+    if(!last_name||!first_name){ toast('请填写姓名',true); return; }
+    const data = {last_name,first_name,
+      street:document.getElementById('psStreet').value.trim(),
+      city:document.getElementById('psCity').value.trim(),
+      province:document.getElementById('psProv').value.trim(),
+      pcode:document.getElementById('psPcode').value.trim()};
+    if(p) Object.assign(p,data);
+    else DB.salespersons.push({id:nextId(DB.salespersons),...data});
+    saveDB(); closeModal(); drawPersonTab();
+    toast(p?'人员信息已更新':'销售人员已新增');
+  };
+}
+function deletePerson(id){
+  if(DB.shifts.some(s=>s.salesperson_id===id)){
+    toast('该人员已安排班次，无法删除',true); return;
+  }
+  confirmDelete('销售人员', DB.salespersons, id, drawPersonTab);
+}
+</script>
+<script>
+/* ============================================================
+   第七部分：统计报表（多维筛选 + 图表 + 产品汇总 + CSV 导出）
+   对应用例：生成销售报表
+   ============================================================ */
+let reportFilter = {eventId:'', venueId:'', start:'', end:''};
+
+function renderReports(){
+  const root = document.getElementById('viewRoot');
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-body search-bar">
+        <select id="rpEvent">
+          <option value="">全部活动</option>
+          ${DB.events.map(e=>`<option value="${e.id}" ${reportFilter.eventId==e.id?'selected':''}>${esc(e.name)}</option>`).join('')}
+        </select>
+        <select id="rpVenue">
+          <option value="">全部场地</option>
+          ${DB.venues.map(v=>`<option value="${v.id}" ${reportFilter.venueId==v.id?'selected':''}>${esc(v.name)}</option>`).join('')}
+        </select>
+        <input type="date" id="rpStart" value="${esc(reportFilter.start)}" title="开始日期">
+        <input type="date" id="rpEnd" value="${esc(reportFilter.end)}" title="结束日期">
+        <button class="btn btn-primary" id="rpQuery">查询统计</button>
+        <button class="btn btn-ghost" id="rpReset">重置</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-gold" id="rpExport">导出 CSV</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="rpKpi"></div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-head"><h3>范围内每日销售趋势</h3></div>
+        <div class="chart-box" id="rpTrend"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>产品销量 TOP 10</h3></div>
+        <div class="chart-box" id="rpTop"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>产品销售汇总</h3>
+        <span class="sub">按产品汇总销量、销售额与毛利估算</span></div>
+      <div class="table-wrap">
+        <table class="data">
+          <colgroup><col style="width:24%"><col style="width:15%"><col style="width:12%"><col style="width:15%"><col style="width:17%"><col style="width:17%"></colgroup>
+          <thead><tr><th>产品</th><th>类别</th><th>销量</th><th>销售额</th><th>毛利估算</th><th>毛利率</th></tr></thead>
+          <tbody id="rpRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-top:26px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--ink-3)">数据保存在浏览器本地（localStorage），清除浏览器缓存将丢失自定义数据</span>
+      <button class="btn btn-danger btn-sm" id="rpResetData">恢复系统初始数据</button>
+    </div>`;
+
+  document.getElementById('rpQuery').onclick = ()=>{
+    reportFilter = {
+      eventId:document.getElementById('rpEvent').value,
+      venueId:document.getElementById('rpVenue').value,
+      start:document.getElementById('rpStart').value,
+      end:document.getElementById('rpEnd').value
+    };
+    drawReport();
+  };
+  document.getElementById('rpReset').onclick = ()=>{
+    reportFilter={eventId:'',venueId:'',start:'',end:''}; renderReports();
+  };
+  document.getElementById('rpExport').onclick = exportCSV;
+  document.getElementById('rpResetData').onclick = ()=>{
+    openModal('恢复初始数据',
+      '<p style="font-size:13.5px;line-height:1.8">将清除全部自定义改动并恢复系统内置的种子数据，确定继续吗？</p>',
+      `<button class="btn btn-ghost" onclick="closeModal()">取消</button>
+       <button class="btn btn-danger" id="rpConfirmReset">确认恢复</button>`);
+    document.getElementById('rpConfirmReset').onclick = ()=>{
+      resetData(); closeModal();
+      toast('已恢复初始数据');
+      renderReports();
+    };
+  };
+  drawReport();
+}
+
+/* 筛选范围内的销售单 */
+function filteredSales(){
+  return DB.sales.filter(s=>{
+    const sh = byId(DB.shifts,s.shift_id);
+    const booth = sh ? byId(DB.booths,sh.booth_id) : null;
+    const day = s.sale_time.slice(0,10);
+    if(reportFilter.eventId && (!sh||sh.event_id != reportFilter.eventId)) return false;
+    if(reportFilter.venueId && (!booth||booth.venue_id != reportFilter.venueId)) return false;
+    if(reportFilter.start && day < reportFilter.start) return false;
+    if(reportFilter.end && day > reportFilter.end) return false;
+    return true;
+  });
+}
+
+function drawReport(){
+  const sales = filteredSales();
+  const rev = sales.reduce((a,s)=>a+saleTotal(s.id),0);
+  const qty = sales.reduce((a,s)=>a+saleQty(s.id),0);
+  const avg = sales.length ? rev/sales.length : 0;
+  document.getElementById('rpKpi').innerHTML = `
+    <div class="card kpi"><div class="kpi-label">范围内销售额</div>
+      <div class="kpi-value">${money(rev)}</div></div>
+    <div class="card kpi gold"><div class="kpi-label">销售单数量</div>
+      <div class="kpi-value num">${sales.length}</div></div>
+    <div class="card kpi terra"><div class="kpi-label">售出产品数量</div>
+      <div class="kpi-value num">${qty}</div></div>
+    <div class="card kpi"><div class="kpi-label">平均客单价</div>
+      <div class="kpi-value">${money(avg)}</div></div>`;
+
+  if(!sales.length){
+    document.getElementById('rpRows').innerHTML =
+      '<tr class="empty-row"><td colspan="6">所选范围内无销售数据（对应用例拓展路径 1a）</td></tr>';
+    ['rpTrend','rpTop'].forEach(id=>{
+      const c = echarts.init(document.getElementById(id));
+      chartInsts.push(c);
+      c.setOption({title:{text:'暂无数据',left:'center',top:'center',
+        textStyle:{color:'#78817B',fontSize:13,fontWeight:'normal'}}});
+    });
+    return;
+  }
+
+  /* 每日趋势 */
+  const dayMap = new Map();
+  sales.forEach(s=>{
+    const d = s.sale_time.slice(0,10);
+    dayMap.set(d,(dayMap.get(d)||0)+saleTotal(s.id));
+  });
+  const dayData = [...dayMap.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+  const c1 = echarts.init(document.getElementById('rpTrend'));
+  chartInsts.push(c1);
+  c1.setOption({
+    color:['#1F5C46'],
+    tooltip:{trigger:'axis',formatter:p=>`${p[0].name}<br>${money(p[0].value)}`},
+    grid:{left:60,right:24,top:30,bottom:34},
+    xAxis:{type:'category',data:dayData.map(d=>d[0].slice(5)),
+      axisLabel:{color:'#78817B',fontSize:11},axisLine:{lineStyle:{color:'#C9CEC6'}}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EFF1ED'}},
+      axisLabel:{color:'#78817B',fontSize:11}},
+    series:[{type:'line',smooth:true,areaStyle:{opacity:.12},
+      data:dayData.map(d=>Math.round(d[1]*100)/100),
+      lineStyle:{width:2.5},symbolSize:7}]
+  });
+
+  /* 产品汇总（含毛利：成交价 − 批发成本） */
+  const agg = new Map();
+  sales.forEach(s=>{
+    saleLines(s.id).forEach(l=>{
+      const cur = agg.get(l.product_id) || {qty:0,rev:0,cost:0};
+      const prod = byId(DB.products,l.product_id);
+      cur.qty += l.quantity;
+      cur.rev += l.final_price*l.quantity;
+      cur.cost += prod.wholesale_cost*l.quantity;
+      agg.set(l.product_id,cur);
+    });
+  });
+  const aggArr = [...agg.entries()].map(([pid,v])=>{
+    const prod = byId(DB.products,pid);
+    const gross = v.rev - v.cost;
+    return {pid,name:prod.name,
+      cat:byId(DB.categories,prod.category_id)?.type || '—',
+      qty:v.qty, rev:Math.round(v.rev*100)/100,
+      gross:Math.round(gross*100)/100,
+      rate:v.rev ? gross/v.rev*100 : 0};
+  }).sort((a,b)=>b.rev-a.rev);
+
+  /* TOP10 横向条形图 */
+  const top = [...aggArr].sort((a,b)=>b.qty-a.qty).slice(0,10).reverse();
+  const c2 = echarts.init(document.getElementById('rpTop'));
+  chartInsts.push(c2);
+  c2.setOption({
+    color:['#D99A3D'],
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    grid:{left:108,right:30,top:14,bottom:20},
+    xAxis:{type:'value',splitLine:{lineStyle:{color:'#EFF1ED'}},
+      axisLabel:{color:'#78817B',fontSize:11}},
+    yAxis:{type:'category',data:top.map(t=>t.name),
+      axisLabel:{color:'#46504A',fontSize:11,width:100,overflow:'truncate'},
+      axisLine:{lineStyle:{color:'#C9CEC6'}}},
+    series:[{type:'bar',data:top.map(t=>t.qty),barMaxWidth:16,
+      itemStyle:{borderRadius:[0,4,4,0]},
+      label:{show:true,position:'right',color:'#46504A',fontSize:11}}]
+  });
+
+  document.getElementById('rpRows').innerHTML = aggArr.map(r=>`
+    <tr>
+      <td>${esc(r.name)}</td>
+      <td><span class="tag tag-gray">${esc(r.cat)}</span></td>
+      <td class="num">${r.qty}</td>
+      <td class="num" style="color:var(--terra);font-weight:600">${money(r.rev)}</td>
+      <td class="num" style="color:var(--green-600);font-weight:600">${money(r.gross)}</td>
+      <td class="num">${r.rate.toFixed(1)}%</td>
+    </tr>`).join('');
+}
+
+/* ---------- CSV 导出（带 BOM，Excel 可直接打开） ---------- */
+function exportCSV(){
+  const sales = filteredSales();
+  if(!sales.length){ toast('范围内无数据可导出',true); return; }
+  const header = ['销售单号','销售时间','活动','场地','展位','销售人员',
+    '产品','类别','数量','成交价','行金额'];
+  const rows = [];
+  sales.sort((a,b)=>a.sale_time.localeCompare(b.sale_time)).forEach(s=>{
+    const sh = byId(DB.shifts,s.shift_id);
+    const ev = byId(DB.events,sh.event_id);
+    const booth = byId(DB.booths,sh.booth_id);
+    const venue = byId(DB.venues,booth.venue_id);
+    const sp = byId(DB.salespersons,sh.salesperson_id);
+    saleLines(s.id).forEach(l=>{
+      const prod = byId(DB.products,l.product_id);
+      const cat = byId(DB.categories,prod.category_id);
+      rows.push([
+        'SALE-'+String(s.id).padStart(4,'0'), s.sale_time,
+        ev.name, venue.name, booth.location, personName(sp),
+        prod.name, cat.type, l.quantity, l.final_price,
+        Math.round(l.final_price*l.quantity*100)/100
+      ]);
+    });
+  });
+  const csv = [header,...rows].map(r=>
+    r.map(c=>{
+      c = String(c ?? '');
+      return /[",\n]/.test(c) ? '"'+c.replace(/"/g,'""')+'"' : c;
+    }).join(',')).join('\r\n');
+  const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='Foxcore销售报表_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('CSV 报表已导出');
+}
+
+/* ============================================================
+   第八部分：系统初始化
+   ============================================================ */
+loadDB();
+applyRoleNav();
+if(!location.hash) location.hash = '#/dashboard';
+router();
+window.addEventListener('resize', ()=>chartInsts.forEach(c=>c.resize()));
+</script>
+</body>
+</html>
